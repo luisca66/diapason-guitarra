@@ -44,7 +44,8 @@
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
     }
     button { touch-action: manipulation; }
-    header, .scorebar, .question, .fb-scroll, .fb-hint, .ans-area, .fb-zone, .streak, .key-hint {
+    [hidden] { display: none !important; }
+    header, .setup-card, .session-bar, .scorebar, .question, .fb-scroll, .fb-hint, .ans-area, .fb-zone, .streak, .key-hint {
       width: min(100%, 980px);
     }
 
@@ -74,6 +75,151 @@
     .stat-v { display: block; font-size: 1.75rem; font-weight: 700; color: var(--gold); line-height: 1; }
     .stat-l { display: block; font-size: 0.57rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); margin-top: 0.15rem; }
     .sep { width: 1px; height: 2.4rem; background: rgba(201,162,39,0.14); }
+
+    /* ── SETUP / SESSION ─────────────────────────────────────────────────── */
+    .setup-card {
+      margin-bottom: 1.8rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(201,162,39,0.18);
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(22,12,6,0.96), rgba(12,7,3,0.92)),
+        radial-gradient(circle at top, rgba(201,162,39,0.08), transparent 60%);
+      box-shadow: inset 0 1px 0 rgba(201,162,39,0.08), 0 16px 40px rgba(0,0,0,0.22);
+      text-align: center;
+    }
+    .setup-eye {
+      font-size: 0.58rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 0.65rem;
+    }
+    .setup-title {
+      color: var(--cream);
+      font-size: clamp(1.1rem, 4vw, 1.55rem);
+      font-weight: 700;
+      margin-bottom: 1.15rem;
+    }
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .setup-option {
+      padding: 1rem;
+      border: 1px solid rgba(201,162,39,0.2);
+      border-radius: 18px;
+      background: rgba(18,10,5,0.74);
+      color: var(--text);
+      text-align: left;
+      transition: border-color 0.18s, transform 0.12s, box-shadow 0.18s, background 0.18s;
+    }
+    .setup-option strong {
+      display: block;
+      color: var(--cream);
+      font-size: 0.95rem;
+      margin-bottom: 0.38rem;
+    }
+    .setup-option span {
+      display: block;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: var(--dim);
+    }
+    .setup-option.active {
+      border-color: rgba(201,162,39,0.52);
+      background: linear-gradient(180deg, rgba(201,162,39,0.11), rgba(18,10,5,0.86));
+      box-shadow: 0 0 0 1px rgba(201,162,39,0.14), 0 12px 30px rgba(0,0,0,0.18);
+      transform: translateY(-1px);
+    }
+    .timer-config {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+      margin: 0 0 1rem;
+    }
+    .timer-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .timer-select {
+      min-width: 170px;
+      padding: 0.72rem 0.95rem;
+      border: 1px solid rgba(201,162,39,0.26);
+      border-radius: 14px;
+      background: #120b06;
+      color: var(--cream);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+    }
+    .start-btn, .session-menu-btn {
+      border: 1px solid rgba(201,162,39,0.3);
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+    .start-btn {
+      min-width: min(100%, 260px);
+      padding: 0.85rem 1.2rem;
+      background: rgba(201,162,39,0.11);
+      border-radius: 999px;
+      color: var(--gold-lt);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+    }
+    .start-btn:hover, .session-menu-btn:hover {
+      background: rgba(201,162,39,0.16);
+      border-color: rgba(201,162,39,0.62);
+      color: var(--gold-lt);
+      box-shadow: 0 0 18px rgba(201,162,39,0.12);
+    }
+    .session-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .session-chip {
+      flex: 1 1 150px;
+      min-width: 140px;
+      padding: 0.72rem 0.9rem;
+      border: 1px solid rgba(201,162,39,0.15);
+      border-radius: 16px;
+      background: rgba(12,7,3,0.82);
+      text-align: center;
+    }
+    .session-k {
+      display: block;
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 0.28rem;
+    }
+    .session-v {
+      display: block;
+      color: var(--cream);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .session-v.danger { color: var(--err-lt); }
+    .session-menu-btn {
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+    }
 
     /* ── QUESTION ────────────────────────────────────────────────────────── */
     .question { text-align: center; margin-bottom: 1.6rem; }
@@ -294,6 +440,20 @@
         flex-wrap: wrap;
         gap: 0.5rem;
       }
+      .setup-card {
+        padding: 1rem;
+        margin-bottom: 1.35rem;
+      }
+      .setup-grid { grid-template-columns: 1fr; }
+      .session-bar { gap: 0.55rem; }
+      .session-chip {
+        flex-basis: calc(50% - 0.3rem);
+        min-width: 0;
+      }
+      .session-menu-btn {
+        width: 100%;
+        min-height: 46px;
+      }
       .mode-lbl {
         width: 100%;
         margin-right: 0;
@@ -328,6 +488,7 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 0.65rem;
       }
+      .session-chip { flex-basis: 100%; }
       .sep { display: none; }
       .stat-l {
         font-size: 0.52rem;
@@ -350,7 +511,43 @@
   <div class="sub">entrenador de notas · guitarra estándar</div>
 </header>
 
-<div class="scorebar">
+<div class="setup-card" id="setup-card">
+  <div class="setup-eye">Elige tu modo</div>
+  <div class="setup-title">¿Cómo quieres jugar?</div>
+  <div class="setup-grid">
+    <button class="setup-option active" data-game-mode="classic" onclick="setGameMode('classic')">
+      <strong>Clásico</strong>
+      <span>El modo actual: sin reloj, sin strikes y a tu propio ritmo.</span>
+    </button>
+    <button class="setup-option" data-game-mode="time" onclick="setGameMode('time')">
+      <strong>Time Attack</strong>
+      <span>Con reloj por pregunta y tercer strike fuera.</span>
+    </button>
+  </div>
+  <div class="timer-config" id="timer-config" hidden>
+    <label class="timer-label" for="time-limit">Cuenta regresiva por pregunta</label>
+    <select class="timer-select" id="time-limit" onchange="setTimeLimit(this.value)"></select>
+  </div>
+  <button class="start-btn" onclick="startSession()">Empezar</button>
+</div>
+
+<div class="session-bar" id="session-bar" hidden>
+  <div class="session-chip">
+    <span class="session-k">Modo</span>
+    <strong class="session-v" id="game-mode-v">Clásico</strong>
+  </div>
+  <div class="session-chip" id="timer-chip" hidden>
+    <span class="session-k">Tiempo</span>
+    <strong class="session-v" id="timer-v">10s</strong>
+  </div>
+  <div class="session-chip" id="strike-chip" hidden>
+    <span class="session-k">Strikes</span>
+    <strong class="session-v" id="strikes-v">0/3</strong>
+  </div>
+  <button class="session-menu-btn" onclick="goToSetup()">Cambiar modo</button>
+</div>
+
+<div class="scorebar" id="scorebar" hidden>
   <div class="stat"><span class="stat-v" id="s-ok">0</span><span class="stat-l">Correctas</span></div>
   <div class="sep"></div>
   <div class="stat"><span class="stat-v" id="s-tot">0</span><span class="stat-l">Total</span></div>
@@ -358,7 +555,7 @@
   <div class="stat"><span class="stat-v" id="s-pct">—</span><span class="stat-l">Precisión</span></div>
 </div>
 
-<div class="question">
+<div class="question" id="question-box" hidden>
   <div class="q-eyebrow">¿Cuál es la nota en...?</div>
   <div class="q-main">
     Cuerda <em id="q-str">—</em>&nbsp;·&nbsp;Traste <em id="q-fret">—</em>
@@ -372,7 +569,7 @@
   Ábrelo en Safari/Chrome o súbelo a un hosting para usar la app completa.
 </div>
 
-<div class="fb-scroll">
+<div class="fb-scroll" id="fretboard-scroll" hidden>
   <div class="fb-wrap" id="fb-wrap">
     <div class="fret-nums-row" id="fret-nums"></div>
     <div class="neck" id="neck">
@@ -380,9 +577,9 @@
     </div>
   </div>
 </div>
-<div class="fb-hint">Desliza el diapasón para ver todos los trastes</div>
+<div class="fb-hint" id="fretboard-hint" hidden>Desliza el diapasón para ver todos los trastes</div>
 
-<div class="ans-area">
+<div class="ans-area" id="answer-area" hidden>
   <div class="mode-row">
     <span class="mode-lbl">Notación:</span>
     <button class="mbtn active" data-mode="sharp" onclick="setMode('sharp')">♯ Sostenidos</button>
@@ -392,13 +589,13 @@
   <div class="note-grid" id="note-grid"></div>
 </div>
 
-<div class="fb-zone">
+<div class="fb-zone" id="feedback-zone" hidden>
   <div class="fb-msg" id="fb-msg"></div>
-  <button class="next-btn" id="next-btn" onclick="nextQ()">Siguiente →</button>
+  <button class="next-btn" id="next-btn" onclick="handlePrimaryAction()">Siguiente →</button>
 </div>
 
-<div class="streak">Racha: <strong id="streak-v">0</strong></div>
-<div class="key-hint">Enter o Espacio → siguiente pregunta</div>
+<div class="streak" id="streak-box" hidden>Racha: <strong id="streak-v">0</strong></div>
+<div class="key-hint" id="key-hint" hidden>Enter o Espacio → siguiente pregunta</div>
 
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
@@ -616,6 +813,17 @@ function buildButtons() {
   });
 }
 
+function buildTimeOptions() {
+  const select = document.getElementById('time-limit');
+  for (let seconds = 5; seconds <= 20; seconds++) {
+    const option = document.createElement('option');
+    option.value = seconds;
+    option.textContent = `${seconds} segundos`;
+    if (seconds === 10) option.selected = true;
+    select.appendChild(option);
+  }
+}
+
 function centerCurrentFret(behavior = 'smooth') {
   const scroller = document.querySelector('.fb-scroll');
   const cell = document.getElementById(`c-${curS}-${curF}`);
@@ -639,9 +847,155 @@ function centerCurrentFret(behavior = 'smooth') {
 //  GAME LOGIC
 // ══════════════════════════════════════════════════════════════════════════════
 
-let curS = 0, curF = 0, hits = 0, total = 0, streak = 0, done = false;
+const GAME_SECTION_IDS = [
+  'session-bar',
+  'scorebar',
+  'question-box',
+  'fretboard-scroll',
+  'fretboard-hint',
+  'answer-area',
+  'feedback-zone',
+  'streak-box',
+  'key-hint'
+];
+
+let curS = 0;
+let curF = 0;
+let hits = 0;
+let total = 0;
+let streak = 0;
+let strikes = 0;
+let done = false;
+let sessionActive = false;
+let gameMode = 'classic';
+let timeLimit = 10;
+let timerLeft = 10;
+let roundTimer = 0;
+let autoAdvanceTimer = 0;
+let primaryAction = 'next';
+
+function updateScoreboard() {
+  document.getElementById('s-ok').textContent = hits;
+  document.getElementById('s-tot').textContent = total;
+  document.getElementById('s-pct').textContent = total ? Math.round(hits / total * 100) + '%' : '—';
+  document.getElementById('streak-v').textContent = streak;
+}
+
+function updateSessionBar() {
+  const isTimeAttack = gameMode === 'time';
+  const modeLabel = isTimeAttack ? 'Time Attack' : 'Clásico';
+  document.getElementById('game-mode-v').textContent = modeLabel;
+  document.getElementById('timer-chip').hidden = !isTimeAttack;
+  document.getElementById('strike-chip').hidden = !isTimeAttack;
+  document.getElementById('timer-v').textContent = `${isTimeAttack ? timerLeft : timeLimit}s`;
+  document.getElementById('strikes-v').textContent = `${strikes}/3`;
+  document.getElementById('strikes-v').classList.toggle('danger', strikes >= 2);
+}
+
+function setSectionsVisible(visible) {
+  GAME_SECTION_IDS.forEach(id => {
+    document.getElementById(id).hidden = !visible;
+  });
+  document.getElementById('setup-card').hidden = visible;
+}
+
+function setGameMode(nextMode) {
+  gameMode = nextMode;
+  document.querySelectorAll('.setup-option').forEach(option => {
+    option.classList.toggle('active', option.dataset.gameMode === nextMode);
+  });
+  document.getElementById('timer-config').hidden = nextMode !== 'time';
+  timerLeft = timeLimit;
+  updateSessionBar();
+}
+
+function setTimeLimit(value) {
+  timeLimit = Number(value);
+  timerLeft = timeLimit;
+  updateSessionBar();
+}
+
+function clearTimers() {
+  clearInterval(roundTimer);
+  clearTimeout(autoAdvanceTimer);
+  roundTimer = 0;
+  autoAdvanceTimer = 0;
+}
+
+function setPrimaryAction(action, label, show) {
+  primaryAction = action;
+  const btn = document.getElementById('next-btn');
+  btn.textContent = label;
+  btn.className = show ? 'next-btn show' : 'next-btn';
+}
+
+function handlePrimaryAction() {
+  if (primaryAction === 'restart') {
+    startSession();
+    return;
+  }
+  nextQ();
+}
+
+function queueNextRound(delay) {
+  clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = setTimeout(() => {
+    if (sessionActive) nextQ();
+  }, delay);
+}
+
+function startRoundTimer() {
+  clearInterval(roundTimer);
+  roundTimer = 0;
+  if (gameMode !== 'time' || !sessionActive) return;
+
+  timerLeft = timeLimit;
+  updateSessionBar();
+  roundTimer = setInterval(() => {
+    timerLeft--;
+    updateSessionBar();
+    if (timerLeft <= 0) {
+      clearInterval(roundTimer);
+      roundTimer = 0;
+      resolveAnswer(null, { timedOut: true });
+    }
+  }, 1000);
+}
+
+function startSession() {
+  clearTimers();
+  sessionActive = true;
+  hits = 0;
+  total = 0;
+  streak = 0;
+  strikes = 0;
+  timerLeft = timeLimit;
+  done = false;
+  updateScoreboard();
+  updateSessionBar();
+  document.getElementById('fb-msg').textContent = '';
+  document.getElementById('fb-msg').className = 'fb-msg';
+  setPrimaryAction('next', 'Siguiente →', false);
+  setSectionsVisible(true);
+  nextQ();
+}
+
+function goToSetup() {
+  clearTimers();
+  sessionActive = false;
+  done = false;
+  document.getElementById(`d-${curS}-${curF}`)?.classList.remove('on');
+  document.getElementById('fb-msg').textContent = '';
+  document.getElementById('fb-msg').className = 'fb-msg';
+  setPrimaryAction('next', 'Siguiente →', false);
+  setSectionsVisible(false);
+  updateSessionBar();
+}
 
 function nextQ() {
+  if (!sessionActive) return;
+  clearTimers();
+
   // Remove old dot
   document.getElementById(`d-${curS}-${curF}`)?.classList.remove('on');
 
@@ -653,6 +1007,7 @@ function nextQ() {
 
   // Hide feedback
   document.getElementById('fb-msg').className = 'fb-msg';
+  document.getElementById('fb-msg').textContent = '';
   document.getElementById('next-btn').className = 'next-btn';
 
   // New random position
@@ -666,30 +1021,39 @@ function nextQ() {
   requestAnimationFrame(() => {
     document.getElementById(`d-${curS}-${curF}`)?.classList.add('on');
     centerCurrentFret(total ? 'smooth' : 'auto');
+    startRoundTimer();
     setTimeout(() => playNote(curS, curF), 80); // slight delay so dot appears first
   });
 }
 
 function answer(sharp) {
-  if (done) return;
+  resolveAnswer(sharp);
+}
+
+function resolveAnswer(sharp, { timedOut = false } = {}) {
+  if (!sessionActive || done) return;
   done = true;
+  clearInterval(roundTimer);
+  roundTimer = 0;
 
   const correct = noteAt(curS, curF);
-  const ok      = sharp === correct;
+  const ok      = !timedOut && sharp === correct;
 
   total++;
-  ok ? (hits++, streak++) : (streak = 0);
-
-  // Update scoreboard
-  document.getElementById('s-ok').textContent  = hits;
-  document.getElementById('s-tot').textContent = total;
-  document.getElementById('s-pct').textContent = Math.round(hits / total * 100) + '%';
-  document.getElementById('streak-v').textContent = streak;
+  if (ok) {
+    hits++;
+    streak++;
+  } else {
+    streak = 0;
+    if (gameMode === 'time') strikes++;
+  }
+  updateScoreboard();
+  updateSessionBar();
 
   // Mark buttons — use data-sharp attribute for lookup
   document.querySelectorAll('.nbtn').forEach(b => b.disabled = true);
   document.querySelector(`.nbtn[data-sharp="${correct}"]`).classList.add('is-ok');
-  if (!ok) document.querySelector(`.nbtn[data-sharp="${sharp}"]`).classList.add('is-err');
+  if (!ok && sharp) document.querySelector(`.nbtn[data-sharp="${sharp}"]`)?.classList.add('is-err');
 
   // Feedback text
   const fb = document.getElementById('fb-msg');
@@ -697,6 +1061,14 @@ function answer(sharp) {
     const msgs = ['¡Correcto!', '¡Exacto!', '¡Muy bien!', '¡Perfecto!', '¡Excelente!'];
     fb.textContent = msgs[Math.floor(Math.random() * msgs.length)];
     fb.className   = 'fb-msg ok show';
+  } else if (timedOut) {
+    fb.textContent = gameMode === 'time'
+      ? `Tiempo agotado — strike ${strikes} de 3`
+      : `Tiempo agotado — era ${displayNote(correct)}`;
+    fb.className = 'fb-msg err show';
+  } else if (gameMode === 'time') {
+    fb.textContent = `Strike ${strikes} de 3 — era ${displayNote(correct)}`;
+    fb.className   = 'fb-msg err show';
   } else {
     fb.textContent = `Incorrecto — era ${displayNote(correct)}`;
     fb.className   = 'fb-msg err show';
@@ -705,9 +1077,22 @@ function answer(sharp) {
   // Audio feedback
   playFeedback(ok);
 
+  if (gameMode === 'time') {
+    if (!ok && strikes >= 3) {
+      fb.textContent = 'Game over — 3 strikes. Intenta de nuevo.';
+      fb.className = 'fb-msg err show';
+      setTimeout(() => {
+        setPrimaryAction('restart', 'Intenta de nuevo', true);
+      }, 280);
+      return;
+    }
+    queueNextRound(ok ? 700 : 1100);
+    return;
+  }
+
   // Show "Next" button with slight delay
   setTimeout(() => {
-    document.getElementById('next-btn').className = 'next-btn show';
+    setPrimaryAction('next', 'Siguiente →', true);
   }, 400);
 }
 
@@ -719,8 +1104,10 @@ function answer(sharp) {
 buildFretNums();
 buildNeck();
 buildButtons();
-nextQ();
+buildTimeOptions();
 document.body.classList.add('app-ready');
+setGameMode('classic');
+goToSetup();
 
 // Inlays need the DOM fully laid out
 requestAnimationFrame(() => requestAnimationFrame(buildInlays));
@@ -739,9 +1126,15 @@ window.addEventListener('orientationchange', refreshMobileLayout);
 
 // Keyboard: Enter or Space advances to next question
 document.addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && done) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  if (!document.getElementById('setup-card').hidden) {
     e.preventDefault();
-    nextQ();
+    startSession();
+    return;
+  }
+  if (done) {
+    e.preventDefault();
+    handlePrimaryAction();
   }
 });
 </script>
