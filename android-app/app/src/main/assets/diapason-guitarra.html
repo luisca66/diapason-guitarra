@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Diapasón — Entrenador de Notas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080604;
+      --gold:    #c9a227;
+      --gold-lt: #f0d060;
+      --gold-dim:#6b5218;
+      --cream:   #f0e8d0;
+      --text:    #c8b890;
+      --dim:     #554530;
+      --ok:      #3d8f5c;
+      --ok-lt:   #72d496;
+      --err:     #9e3a28;
+      --err-lt:  #e87060;
+    }
+
+    html { -webkit-text-size-adjust: 100%; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding:
+        max(1.25rem, env(safe-area-inset-top))
+        max(0.9rem, env(safe-area-inset-right))
+        calc(4.25rem + env(safe-area-inset-bottom))
+        max(0.9rem, env(safe-area-inset-left));
+      background-image:
+        radial-gradient(ellipse 110% 55% at 50% -5%, rgba(90,45,8,0.38) 0%, transparent 65%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+    }
+    button { touch-action: manipulation; }
+    header, .scorebar, .question, .fb-scroll, .fb-hint, .ans-area, .fb-zone, .streak, .key-hint {
+      width: min(100%, 980px);
+    }
+
+    /* ── HEADER ──────────────────────────────────────────────────────────── */
+    header { text-align: center; margin-bottom: 2.2rem; }
+    .title-row { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
+    .deco   { width: 55px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .deco.r { background: linear-gradient(90deg, var(--gold), transparent); }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900; color: var(--gold); letter-spacing: 0.08em; line-height: 1;
+    }
+    .sub { color: var(--dim); font-size: 0.6rem; letter-spacing: 0.38em; text-transform: uppercase; margin-top: 0.45rem; }
+
+    /* ── SCORE ───────────────────────────────────────────────────────────── */
+    .scorebar {
+      display: flex; align-items: center; justify-content: center; gap: 1.6rem;
+      padding: 0.65rem 1.8rem;
+      background: rgba(12,7,3,0.92);
+      border: 1px solid rgba(201,162,39,0.18);
+      box-shadow: inset 0 1px 0 rgba(201,162,39,0.07);
+      margin-bottom: 2rem;
+      border-radius: 18px;
+    }
+    .stat { text-align: center; min-width: 48px; }
+    .stat-v { display: block; font-size: 1.75rem; font-weight: 700; color: var(--gold); line-height: 1; }
+    .stat-l { display: block; font-size: 0.57rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); margin-top: 0.15rem; }
+    .sep { width: 1px; height: 2.4rem; background: rgba(201,162,39,0.14); }
+
+    /* ── QUESTION ────────────────────────────────────────────────────────── */
+    .question { text-align: center; margin-bottom: 1.6rem; }
+    .q-eyebrow { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.45rem; }
+    .q-main { font-size: 1.05rem; font-weight: 600; color: var(--cream); display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.25rem 0.55rem; }
+    .q-main em { color: var(--gold-lt); font-style: normal; }
+
+    .play-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(201,162,39,0.06);
+      border: 1px solid rgba(201,162,39,0.22); border-radius: 50%;
+      color: var(--gold-dim); font-size: 1rem; line-height: 1;
+      cursor: pointer; margin-left: 0.45rem; flex-shrink: 0;
+      transition: all 0.18s;
+    }
+    .play-btn:hover { border-color: rgba(201,162,39,0.65); color: var(--gold); background: rgba(201,162,39,0.12); }
+    .play-btn.ringing { animation: ring 0.5s ease-out forwards; }
+    @keyframes ring {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.22); border-color: rgba(201,162,39,0.85); color: var(--gold); box-shadow: 0 0 14px rgba(201,162,39,0.32); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── FRETBOARD ───────────────────────────────────────────────────────── */
+    .fb-scroll {
+      overflow-x: auto;
+      margin-bottom: 0.45rem;
+      padding: 0.25rem 0 0.85rem;
+      border-radius: 22px;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scroll-behavior: smooth;
+      scroll-snap-type: x proximity;
+    }
+    .fb-wrap   { min-width: 700px; padding-right: 0.5rem; }
+    .fret-nums-row { display: flex; padding-left: 42px; margin-bottom: 0.45rem; }
+    .fn { flex: 1; text-align: center; font-size: 0.57rem; color: var(--dim); }
+
+    .neck {
+      position: relative;
+      background:
+        repeating-linear-gradient(180deg, transparent 0px, transparent 6px, rgba(0,0,0,0.045) 6px, rgba(0,0,0,0.045) 7px),
+        linear-gradient(180deg, #1b0904 0%, #2b1409 14%, #1e0e06 28%, #33160a 43%, #1b0904 57%, #2a1309 71%, #1f0f06 85%, #2a1308 100%);
+      border-top: 3px solid #080402;
+      border-bottom: 3px solid #080402;
+      box-shadow: inset 0 4px 14px rgba(0,0,0,.72), inset 0 -4px 14px rgba(0,0,0,.72), 0 8px 28px rgba(0,0,0,.6), 0 2px 5px rgba(0,0,0,.85);
+    }
+    .inlay-layer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+    .inlay {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(255,248,220,0.2), rgba(210,190,140,0.05));
+      border: 1px solid rgba(210,190,140,0.12);
+    }
+    .srow   { display: flex; align-items: center; height: 46px; position: relative; z-index: 3; }
+    .slabel { width: 42px; flex-shrink: 0; text-align: center; font-size: 0.67rem; font-weight: 700; color: var(--dim); letter-spacing: 0.04em; position: relative; z-index: 5; }
+    .fcells { flex: 1; display: flex; position: relative; }
+    .fc     { flex: 1; height: 46px; position: relative; scroll-snap-align: center; }
+    .fc.fw::after {
+      content: ''; position: absolute; right: 0; top: 4px; bottom: 4px; width: 2px;
+      background: linear-gradient(180deg, rgba(210,190,125,0.38), rgba(220,200,135,0.88) 25%, rgba(235,215,145,0.92) 50%, rgba(220,200,135,0.88) 75%, rgba(210,190,125,0.38));
+      box-shadow: 0 0 3px rgba(210,190,125,0.22), 1px 0 2px rgba(0,0,0,.6);
+      border-radius: 1px; z-index: 4;
+    }
+    .fc.nut::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 6px;
+      background: linear-gradient(90deg, rgba(200,190,150,0.55), rgba(240,230,190,0.95), rgba(200,190,150,0.75));
+      box-shadow: 2px 0 6px rgba(0,0,0,.5); z-index: 4;
+    }
+    .pdot {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 25px; height: 25px; border-radius: 50%;
+      background: radial-gradient(circle at 36% 33%, var(--gold-lt), #cc8010);
+      box-shadow: 0 0 0 2px rgba(240,190,48,0.28), 0 0 10px rgba(240,180,48,0.52), 0 0 26px rgba(240,180,48,0.28);
+      z-index: 10;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .pdot.on { transform: translate(-50%, -50%) scale(1); animation: dp 2.4s ease-in-out infinite; }
+    @keyframes dp {
+      0%,100% { box-shadow: 0 0 0 2px rgba(240,190,48,0.28), 0 0 10px rgba(240,180,48,0.52), 0 0 26px rgba(240,180,48,0.28); }
+      50%      { box-shadow: 0 0 0 3px rgba(240,190,48,0.18), 0 0 16px rgba(240,180,48,0.6), 0 0 44px rgba(240,180,48,0.24), 0 0 68px rgba(240,180,48,0.1); }
+    }
+
+    /* ── MODE TOGGLE ─────────────────────────────────────────────────────── */
+    .mode-row { display: flex; align-items: center; justify-content: center; margin-bottom: 0.9rem; }
+    .mode-lbl { font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--dim); margin-right: 0.7rem; }
+    .mbtn {
+      padding: 0.34rem 1.1rem;
+      background: transparent;
+      border: 1px solid rgba(201,162,39,0.18);
+      color: var(--dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.73rem; font-weight: 600; letter-spacing: 0.05em;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .mbtn + .mbtn { border-left: none; }
+    .mbtn.active { background: rgba(201,162,39,0.1); border-color: rgba(201,162,39,0.5); color: var(--gold); }
+    .mbtn.active + .mbtn { border-left: 1px solid rgba(201,162,39,0.18); }
+    .mbtn:hover:not(.active) { border-color: rgba(201,162,39,0.35); color: var(--text); }
+
+    /* ── NOTE BUTTONS ────────────────────────────────────────────────────── */
+    .ans-area { margin-bottom: 1.4rem; }
+    .ans-eye  { text-align: center; font-size: 0.59rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.7rem; }
+    .note-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.45rem;
+      width: min(100%, 540px);
+      margin-inline: auto;
+    }
+    .nbtn {
+      width: 100%; height: 60px;
+      background: linear-gradient(155deg, #1c1109, #100a05);
+      border: 1px solid rgba(201,162,39,0.22);
+      color: var(--cream);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.96rem; font-weight: 700;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .nbtn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(155deg, rgba(201,162,39,0.1), transparent 60%);
+      opacity: 0; transition: opacity 0.18s;
+    }
+    .nbtn:hover:not(:disabled) { border-color: rgba(201,162,39,0.62); transform: translateY(-2px); box-shadow: 0 5px 16px rgba(0,0,0,.52), 0 0 8px rgba(201,162,39,0.08); }
+    .nbtn:hover:not(:disabled)::before { opacity: 1; }
+    .nbtn:active:not(:disabled) { transform: translateY(0); }
+    .nbtn:disabled { cursor: default; opacity: 0.42; }
+    .nbtn.is-ok  { border-color: #3a7d52 !important; color: var(--ok-lt)  !important; opacity: 1 !important; box-shadow: 0 0 12px rgba(60,140,90,0.22) !important; }
+    .nbtn.is-err { border-color: #7d3228 !important; color: var(--err-lt) !important; opacity: 0.85 !important; }
+
+    /* ── FEEDBACK ────────────────────────────────────────────────────────── */
+    .fb-zone { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; min-height: 72px; justify-content: center; margin-bottom: 0.4rem; }
+    .fb-msg { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; opacity: 0; transform: translateY(7px); transition: opacity 0.25s ease, transform 0.25s ease; }
+    .fb-msg.show { opacity: 1; transform: translateY(0); }
+    .fb-msg.ok  { color: var(--ok-lt);  }
+    .fb-msg.err { color: var(--err-lt); }
+    .next-btn {
+      padding: 0.55rem 2.4rem; background: transparent;
+      border: 1px solid rgba(201,162,39,0.32); color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+      cursor: pointer; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .next-btn.show { opacity: 1; pointer-events: auto; }
+    .next-btn:hover { background: rgba(201,162,39,0.07); border-color: rgba(201,162,39,0.72); box-shadow: 0 0 18px rgba(201,162,39,0.1); }
+
+    /* ── STREAK ──────────────────────────────────────────────────────────── */
+    .streak { font-size: 0.62rem; letter-spacing: 0.14em; color: var(--dim); margin-top: 0.5rem; }
+    .streak strong { color: var(--gold); font-size: 0.88rem; }
+    .key-hint { font-size: 0.53rem; letter-spacing: 0.16em; color: var(--dim); opacity: 0.5; margin-top: 1.6rem; }
+    .boot-note {
+      width: min(100%, 760px);
+      margin: 0 0 1.15rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid rgba(201,162,39,0.22);
+      border-radius: 14px;
+      background: rgba(28,17,9,0.45);
+      color: var(--cream);
+      font-size: 0.72rem;
+      line-height: 1.55;
+      text-align: center;
+    }
+    .boot-note strong { color: var(--gold-lt); }
+    .app-ready .boot-note { display: none; }
+    .fb-hint {
+      display: none;
+      text-align: center;
+      font-size: 0.56rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 1.2rem;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding-top: max(1rem, env(safe-area-inset-top));
+        padding-left: max(0.8rem, env(safe-area-inset-left));
+        padding-right: max(0.8rem, env(safe-area-inset-right));
+      }
+      header { margin-bottom: 1.5rem; }
+      .title-row { gap: 0.7rem; }
+      .deco { width: 32px; }
+      .sub { font-size: 0.55rem; letter-spacing: 0.28em; }
+      .scorebar {
+        padding: 0.85rem 0.95rem;
+        gap: 0.9rem;
+        margin-bottom: 1.3rem;
+      }
+      .stat { min-width: 0; flex: 1; }
+      .stat-v { font-size: 1.45rem; }
+      .question { margin-bottom: 1.15rem; }
+      .q-main { font-size: 0.98rem; line-height: 1.45; }
+      .play-btn {
+        width: 44px;
+        height: 44px;
+        margin-left: 0;
+        font-size: 1.08rem;
+      }
+      .fb-scroll {
+        padding-bottom: 0.95rem;
+        margin-bottom: 0.35rem;
+      }
+      .fb-wrap { min-width: 600px; }
+      .fret-nums-row { padding-left: 34px; }
+      .srow, .fc { height: 42px; }
+      .slabel { width: 34px; font-size: 0.6rem; }
+      .pdot {
+        width: 22px;
+        height: 22px;
+      }
+      .mode-row {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .mode-lbl {
+        width: 100%;
+        margin-right: 0;
+      }
+      .mbtn {
+        flex: 1;
+        min-height: 46px;
+        padding: 0.55rem 0.7rem;
+      }
+      .note-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.55rem;
+      }
+      .nbtn {
+        height: 64px;
+        font-size: 1rem;
+      }
+      .next-btn {
+        width: min(100%, 320px);
+        min-height: 48px;
+        padding-inline: 1rem;
+        letter-spacing: 0.18em;
+      }
+      .fb-hint { display: block; }
+      .key-hint { display: none; }
+    }
+
+    @media (max-width: 520px) {
+      h1 { font-size: clamp(1.8rem, 10vw, 2.45rem); }
+      .scorebar {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.65rem;
+      }
+      .sep { display: none; }
+      .stat-l {
+        font-size: 0.52rem;
+        letter-spacing: 0.16em;
+      }
+      .q-eyebrow, .ans-eye { letter-spacing: 0.2em; }
+      .fb-wrap { min-width: 540px; }
+      .next-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <div class="deco"></div>
+    <h1>Diapasón</h1>
+    <div class="deco r"></div>
+  </div>
+  <div class="sub">entrenador de notas · guitarra estándar</div>
+</header>
+
+<div class="scorebar">
+  <div class="stat"><span class="stat-v" id="s-ok">0</span><span class="stat-l">Correctas</span></div>
+  <div class="sep"></div>
+  <div class="stat"><span class="stat-v" id="s-tot">0</span><span class="stat-l">Total</span></div>
+  <div class="sep"></div>
+  <div class="stat"><span class="stat-v" id="s-pct">—</span><span class="stat-l">Precisión</span></div>
+</div>
+
+<div class="question">
+  <div class="q-eyebrow">¿Cuál es la nota en...?</div>
+  <div class="q-main">
+    Cuerda <em id="q-str">—</em>&nbsp;·&nbsp;Traste <em id="q-fret">—</em>
+    <button class="play-btn" id="play-btn" onclick="replayNote()" title="Escuchar nota">♪</button>
+  </div>
+</div>
+
+<div class="boot-note">
+  <strong>Si ves guiones, no aparecen botones o el diapasón sale vacío:</strong>
+  ese visor del iPhone no está ejecutando JavaScript del archivo local.
+  Ábrelo en Safari/Chrome o súbelo a un hosting para usar la app completa.
+</div>
+
+<div class="fb-scroll">
+  <div class="fb-wrap" id="fb-wrap">
+    <div class="fret-nums-row" id="fret-nums"></div>
+    <div class="neck" id="neck">
+      <div class="inlay-layer" id="inlay-layer"></div>
+    </div>
+  </div>
+</div>
+<div class="fb-hint">Desliza el diapasón para ver todos los trastes</div>
+
+<div class="ans-area">
+  <div class="mode-row">
+    <span class="mode-lbl">Notación:</span>
+    <button class="mbtn active" data-mode="sharp" onclick="setMode('sharp')">♯ Sostenidos</button>
+    <button class="mbtn"        data-mode="flat"  onclick="setMode('flat')" >♭ Bemoles</button>
+  </div>
+  <div class="ans-eye">Selecciona la nota</div>
+  <div class="note-grid" id="note-grid"></div>
+</div>
+
+<div class="fb-zone">
+  <div class="fb-msg" id="fb-msg"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">Siguiente →</button>
+</div>
+
+<div class="streak">Racha: <strong id="streak-v">0</strong></div>
+<div class="key-hint">Enter o Espacio → siguiente pregunta</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+//  GUITAR DATA
+// ══════════════════════════════════════════════════════════════════════════════
+
+const BASE = 'https://stormstudios.com.mx/wp-content/app_ap_guitar_samples/';
+
+// Chromatic scale — canonical names always use sharps internally
+const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTES_FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+// Standard tuning open-string MIDI notes (index 0 = high e, index 5 = low E)
+// E4=64, B3=59, G3=55, D3=50, A2=45, E2=40
+const OPEN_MIDI = [64, 59, 55, 50, 45, 40];
+
+// Open-string note indices into NOTES_SHARP (same data, used for noteAt())
+const OPEN_IDX = [4, 11, 7, 2, 9, 4]; // E B G D A E
+
+// Display labels (high e → low E)
+const SNAMES = ['e','B','G','D','A','E'];
+
+// Server folder names per string (same order)
+const SFOLDER = [
+  'E String high',   // string idx 0 = string 1 = high e  (E4–E5)
+  'B String',        // string idx 1 = string 2 = B       (B3–B4)
+  'G String',        // string idx 2 = string 3 = G       (G3–G4)
+  'D String',        // string idx 3 = string 4 = D       (D3–D4)
+  'A String',        // string idx 4 = string 5 = A       (A2–A3)
+  'E String low',    // string idx 5 = string 6 = low E   (E2–E3)
+];
+
+const NFRETS = 12; // frets 0–12
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════════════════════════════════════════════
+
+let audioEnabled = false;
+
+// First click anywhere unlocks autoplay
+document.addEventListener('pointerdown', () => { audioEnabled = true; }, { once: true });
+
+/**
+ * Build the URL for a given string + fret.
+ * MIDI → note name + octave → folder/file.mp3
+ * '#' must be percent-encoded as %23 in URLs.
+ */
+function sampleUrl(s, f) {
+  const midi = OPEN_MIDI[s] + f;
+  const note = NOTES_SHARP[midi % 12];
+  const oct  = Math.floor(midi / 12) - 1;           // MIDI 60 = C4
+  const file = note + oct + '.mp3';
+  return BASE + encodeURIComponent(SFOLDER[s]) + '/' + encodeURIComponent(file);
+}
+
+function playUrl(url, vol = 1) {
+  try {
+    const a = new Audio(url);
+    a.volume = vol;
+    a.play().catch(() => {});
+  } catch (e) {}
+}
+
+function playNote(s, f) {
+  if (audioEnabled) playUrl(sampleUrl(s, f));
+}
+
+function playFeedback(ok) {
+  if (audioEnabled) playUrl(BASE + (ok ? 'acierto.mp3' : 'error.mp3'), 0.65);
+}
+
+function replayNote() {
+  audioEnabled = true; // clicking the button counts as interaction
+  const btn = document.getElementById('play-btn');
+  btn.classList.remove('ringing');
+  void btn.offsetWidth; // force reflow to restart animation
+  btn.classList.add('ringing');
+  playUrl(sampleUrl(curS, curF));
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  NOTE DISPLAY  (sharp / flat modes)
+// ══════════════════════════════════════════════════════════════════════════════
+
+let mode = 'sharp'; // 'sharp' | 'flat'
+
+// Canonical note name (always sharp) → display name for current mode
+function displayNote(sharp) {
+  if (mode === 'flat') return NOTES_FLAT[NOTES_SHARP.indexOf(sharp)];
+  return sharp;
+}
+
+// Note at string s, fret f — always returns a sharp name
+function noteAt(s, f) {
+  return NOTES_SHARP[(OPEN_IDX[s] + f) % 12];
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mbtn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === m)
+  );
+  // Update button labels without touching classes
+  document.querySelectorAll('.nbtn').forEach(b => {
+    b.textContent = displayNote(b.dataset.sharp);
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  BUILD UI
+// ══════════════════════════════════════════════════════════════════════════════
+
+function buildFretNums() {
+  const row = document.getElementById('fret-nums');
+  for (let f = 0; f <= NFRETS; f++) {
+    const d = document.createElement('div');
+    d.className = 'fn';
+    d.textContent = f;
+    row.appendChild(d);
+  }
+}
+
+function buildNeck() {
+  const neck  = document.getElementById('neck');
+  const thick = [1, 1.5, 2, 2.5, 3, 3.5]; // px — high e is thinnest
+  const alpha = [0.58, 0.62, 0.66, 0.70, 0.74, 0.78];
+
+  for (let s = 0; s < 6; s++) {
+    const row = document.createElement('div');
+    row.className = 'srow';
+
+    // String name label
+    const lbl = document.createElement('div');
+    lbl.className = 'slabel';
+    lbl.textContent = SNAMES[s];
+    row.appendChild(lbl);
+
+    // Cell container
+    const cells = document.createElement('div');
+    cells.className = 'fcells';
+
+    // The physical string line (CSS only, runs full width)
+    const line = document.createElement('div');
+    line.style.cssText = [
+      'position:absolute', 'top:50%', 'left:0', 'right:0',
+      `height:${thick[s]}px`,
+      'transform:translateY(-50%)',
+      `background:linear-gradient(90deg,
+        rgba(235,215,165,${alpha[s]-0.12}),
+        rgba(255,235,180,${alpha[s]}),
+        rgba(235,215,165,${alpha[s]-0.12}))`,
+      'box-shadow:0 0 2px rgba(245,225,175,.22),0 1px 2px rgba(0,0,0,.5)',
+      'pointer-events:none', 'z-index:1'
+    ].join(';');
+    cells.appendChild(line);
+
+    // Fret cells (0 = nut/open, 1–12 = frets)
+    for (let f = 0; f <= NFRETS; f++) {
+      const cell = document.createElement('div');
+      cell.id        = `c-${s}-${f}`;
+      cell.className = 'fc ' + (f === 0 ? 'nut' : 'fw');
+
+      const dot = document.createElement('div');
+      dot.id        = `d-${s}-${f}`;
+      dot.className = 'pdot';
+      cell.appendChild(dot);
+
+      cells.appendChild(cell);
+    }
+
+    row.appendChild(cells);
+    neck.appendChild(row);
+  }
+}
+
+// Inlay position markers (must run after layout)
+function buildInlays() {
+  const neck  = document.getElementById('neck');
+  const layer = document.getElementById('inlay-layer');
+  layer.innerHTML = '';
+  const nRect = neck.getBoundingClientRect();
+  const nH    = neck.offsetHeight;
+
+  function addDot(fret, yFrac, size) {
+    const cell = document.getElementById(`c-0-${fret}`);
+    if (!cell) return;
+    const cr = cell.getBoundingClientRect();
+    const x  = cr.left - nRect.left + cr.width / 2;
+    const y  = nH * yFrac;
+    const el = document.createElement('div');
+    el.className = 'inlay';
+    el.style.cssText = `left:${x-size/2}px;top:${y-size/2}px;width:${size}px;height:${size}px`;
+    layer.appendChild(el);
+  }
+
+  [3, 5, 7, 9].forEach(f => addDot(f, 0.5, 13));  // single dots
+  addDot(12, 0.27, 11);                            // double dot (high side)
+  addDot(12, 0.73, 11);                            // double dot (low side)
+}
+
+function buildButtons() {
+  const grid = document.getElementById('note-grid');
+  NOTES_SHARP.forEach(sharp => {
+    const btn = document.createElement('button');
+    btn.className      = 'nbtn';
+    btn.dataset.sharp  = sharp;          // canonical ID — never changes
+    btn.textContent    = displayNote(sharp); // respects current mode
+    btn.title          = sharp;
+    btn.onclick        = () => answer(sharp); // always passes canonical sharp
+    grid.appendChild(btn);
+  });
+}
+
+function centerCurrentFret(behavior = 'smooth') {
+  const scroller = document.querySelector('.fb-scroll');
+  const cell = document.getElementById(`c-${curS}-${curF}`);
+  if (!scroller || !cell) return;
+
+  const scrollerRect = scroller.getBoundingClientRect();
+  const cellRect = cell.getBoundingClientRect();
+  const targetLeft =
+    scroller.scrollLeft +
+    (cellRect.left + cellRect.width / 2) -
+    (scrollerRect.left + scroller.clientWidth / 2);
+
+  scroller.scrollTo({
+    left: Math.max(0, targetLeft),
+    behavior
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  GAME LOGIC
+// ══════════════════════════════════════════════════════════════════════════════
+
+let curS = 0, curF = 0, hits = 0, total = 0, streak = 0, done = false;
+
+function nextQ() {
+  // Remove old dot
+  document.getElementById(`d-${curS}-${curF}`)?.classList.remove('on');
+
+  // Reset buttons
+  document.querySelectorAll('.nbtn').forEach(b => {
+    b.disabled = false;
+    b.classList.remove('is-ok', 'is-err');
+  });
+
+  // Hide feedback
+  document.getElementById('fb-msg').className = 'fb-msg';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  // New random position
+  curS = Math.floor(Math.random() * 6);
+  curF = Math.floor(Math.random() * (NFRETS + 1));
+  done = false;
+
+  document.getElementById('q-str').textContent  = curS + 1;
+  document.getElementById('q-fret').textContent = curF;
+
+  requestAnimationFrame(() => {
+    document.getElementById(`d-${curS}-${curF}`)?.classList.add('on');
+    centerCurrentFret(total ? 'smooth' : 'auto');
+    setTimeout(() => playNote(curS, curF), 80); // slight delay so dot appears first
+  });
+}
+
+function answer(sharp) {
+  if (done) return;
+  done = true;
+
+  const correct = noteAt(curS, curF);
+  const ok      = sharp === correct;
+
+  total++;
+  ok ? (hits++, streak++) : (streak = 0);
+
+  // Update scoreboard
+  document.getElementById('s-ok').textContent  = hits;
+  document.getElementById('s-tot').textContent = total;
+  document.getElementById('s-pct').textContent = Math.round(hits / total * 100) + '%';
+  document.getElementById('streak-v').textContent = streak;
+
+  // Mark buttons — use data-sharp attribute for lookup
+  document.querySelectorAll('.nbtn').forEach(b => b.disabled = true);
+  document.querySelector(`.nbtn[data-sharp="${correct}"]`).classList.add('is-ok');
+  if (!ok) document.querySelector(`.nbtn[data-sharp="${sharp}"]`).classList.add('is-err');
+
+  // Feedback text
+  const fb = document.getElementById('fb-msg');
+  if (ok) {
+    const msgs = ['¡Correcto!', '¡Exacto!', '¡Muy bien!', '¡Perfecto!', '¡Excelente!'];
+    fb.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    fb.className   = 'fb-msg ok show';
+  } else {
+    fb.textContent = `Incorrecto — era ${displayNote(correct)}`;
+    fb.className   = 'fb-msg err show';
+  }
+
+  // Audio feedback
+  playFeedback(ok);
+
+  // Show "Next" button with slight delay
+  setTimeout(() => {
+    document.getElementById('next-btn').className = 'next-btn show';
+  }, 400);
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════════════
+
+buildFretNums();
+buildNeck();
+buildButtons();
+nextQ();
+document.body.classList.add('app-ready');
+
+// Inlays need the DOM fully laid out
+requestAnimationFrame(() => requestAnimationFrame(buildInlays));
+
+let layoutTimer = 0;
+function refreshMobileLayout() {
+  clearTimeout(layoutTimer);
+  layoutTimer = setTimeout(() => {
+    buildInlays();
+    centerCurrentFret('auto');
+  }, 120);
+}
+
+window.addEventListener('resize', refreshMobileLayout);
+window.addEventListener('orientationchange', refreshMobileLayout);
+
+// Keyboard: Enter or Space advances to next question
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && done) {
+    e.preventDefault();
+    nextQ();
+  }
+});
+</script>
+</body>
+</html>
