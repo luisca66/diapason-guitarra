@@ -862,6 +862,23 @@ const GAME_SECTION_IDS = [
 let curS = 0;
 let curF = 0;
 let hits = 0;
+
+// Shuffle bag: all (string, fret) combos visited once before repeating
+let bag = [];
+function refillBag() {
+  bag = [];
+  for (let s = 0; s < 6; s++)
+    for (let f = 0; f <= NFRETS; f++)
+      bag.push([s, f]);
+  for (let i = bag.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [bag[i], bag[j]] = [bag[j], bag[i]];
+  }
+}
+function pickFromBag() {
+  if (bag.length === 0) refillBag();
+  return bag.pop();
+}
 let total = 0;
 let streak = 0;
 let strikes = 0;
@@ -1010,9 +1027,8 @@ function nextQ() {
   document.getElementById('fb-msg').textContent = '';
   document.getElementById('next-btn').className = 'next-btn';
 
-  // New random position
-  curS = Math.floor(Math.random() * 6);
-  curF = Math.floor(Math.random() * (NFRETS + 1));
+  // New position from shuffle bag (no repeats until all visited)
+  [curS, curF] = pickFromBag();
   done = false;
 
   document.getElementById('q-str').textContent  = curS + 1;
